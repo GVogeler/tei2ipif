@@ -1,4 +1,4 @@
-# tei2pipif
+# tei2ipif
 experiments with more or less generic proposal how to convert a TEI scholarly edition into an IPIF data set that can be process by http://github.com/IPIF/ipif-hub
 
     This is the start of a generic TEI2IPIF conversion based on some regular practice in modelling personography in TEI encoded scholarly editions.

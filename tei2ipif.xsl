@@ -35,8 +35,8 @@
         -->
         
 {"factoids": [
-        <xsl:apply-templates select="//t:text//(t:rs[@type='person']|t:persName)[@ref]" mode="factoids"/>],
-        "persons": [<xsl:apply-templates select="//t:text//(t:rs[@type='person']|t:persName)[@ref][not(ancestor::t:listPerson)]" mode="persons"/>
+        <xsl:apply-templates select="//t:text//((t:rs|t:name)[@type='person']|t:persName)[@ref or @key]" mode="factoids"/>],
+        "persons": [<xsl:apply-templates select="//t:text//((t:rs|t:name)[@type='person']|t:persName)[@ref or @key][not(ancestor::t:listPerson)]" mode="persons"/>
         <xsl:apply-templates select="//t:listPerson/t:person" mode="persons"/>
         <xsl:text>],
     "sources": [{
@@ -50,11 +50,11 @@
         }
 
     ],
-    "statements": [<xsl:apply-templates select="//t:text//(t:rs[@type='person']|t:persName)[@ref]" mode="statement"/>]
+    "statements": [<xsl:apply-templates select="//t:text//((t:rs|t:name)[@type='person']|t:persName)[@ref or @key]" mode="statement"/>]
 } 
     </xsl:template>
-    <xsl:template match="//t:text//(t:rs[@type='person']|t:persName)[@ref]" mode="factoids">
-        <xsl:variable name="ref" select="@ref"/>
+    <xsl:template match="//t:text//((t:rs|t:name)[@type='person']|t:persName)[@ref or @key]" mode="factoids">
+        <xsl:variable name="ref" select="(@ref|@key)"/>
         <xsl:text>{
             "@id": "f_</xsl:text><xsl:call-template name="personID"/><xsl:text>_</xsl:text><xsl:value-of select="generate-id()"/><xsl:text>",
             "person-ref": { "@id": "p_</xsl:text><xsl:call-template name="personID"/><xsl:text>" },
@@ -65,9 +65,9 @@
             </xsl:text><!--,"modifiedBy": "Researcher2",
             "modifiedWhen": "2012-04-23"-->
         }
-        <xsl:if test="following::t:rs|following::t:persName"><xsl:text>,</xsl:text></xsl:if>
+        <xsl:if test="following::t:rs[@type='person']|following::t:name[@type='person']|following::t:persName"><xsl:text>,</xsl:text></xsl:if>
     </xsl:template>
-    <xsl:template match="t:text//(t:rs[@type='person']|t:persName)[@ref]" mode="listStatementIDs">
+    <xsl:template match="t:text//((t:rs|t:name)[@type='person']|t:persName)[@ref or @key]" mode="listStatementIDs">
         <!-- ToDo -->
         <!-- 1. Content of the element itself -->
         <xsl:text>{ "@id": "st_</xsl:text><xsl:value-of select="if(@xml:id) then (@xml:id) else (generate-id())"/><xsl:text>" }</xsl:text>
@@ -80,7 +80,7 @@
 <!--        <xsl:if test="(following::t:rs|following::t:persName"><xsl:text>,</xsl:text></xsl:if>
 -->    </xsl:template>
     <!-- Persons -->
-    <xsl:template match="//t:text//(t:rs[@type='person']|t:persName)[@ref]" mode="persons">
+    <xsl:template match="//t:text//((t:rs|t:name)[@type='person']|t:persName)[@ref or @key]" mode="persons">
         <xsl:text>{
             "@id": "</xsl:text><xsl:call-template name="personID"/><xsl:text>",
         "label": "</xsl:text><xsl:value-of select="normalize-space()"/><xsl:text>",
@@ -90,10 +90,10 @@
         <!--,"modifiedBy": "Researcher3",
         "modifiedWhen": "2012-04-23"-->
         }
-        <xsl:if test="(following::t:rs[@type='person']|following::t:persName)[@ref]"><xsl:text>,</xsl:text></xsl:if>
+        <xsl:if test="(following::t:rs[@type='person']|following::t:name[@type='person']|following::t:persName)[@ref or @key]"><xsl:text>,</xsl:text></xsl:if>
     </xsl:template>
     <!-- Statements -->
-    <xsl:template match="//t:text//(t:rs[@type='person']|t:persName)[@ref]" mode="statement">
+    <xsl:template match="//t:text//((t:rs|t:name)[@type='person']|t:persName)[@ref or @key]" mode="statement">
         <xsl:variable name="context" select="(ancestor::t:p|ancestor::t:ab|ancestor::t:item|ancestor::t:note)[1]"/>
         <!-- ToDo -->
         {
@@ -119,14 +119,18 @@
         "label": "",
         "statementText": "<xsl:value-of select="$context/normalize-space()"/>"
         }
-        <xsl:if test="following::t:rs|following::t:persName"><xsl:text>,</xsl:text></xsl:if>
+        <xsl:if test="following::t:rs|following::t:name[@type='person']|following::t:persName"><xsl:text>,</xsl:text></xsl:if>
     </xsl:template>
     
     <!-- Bilden der Personen-ID -->
     <xsl:template name="personID">
         <xsl:value-of select="(self::t:rs[@type='person']/replace(@ref,'^#',''),
-            self::t:persName/replace(@ref,'^#','')
-            ,self::t:person/@xml:id)"/>
+            self::t:name[@type='person']/replace(@ref,'^#',''),
+            self::t:persName/replace(@ref,'^#',''),
+            self::t:rs[@type='person']/@key,
+            self::t:name[@type='person']/@key,
+            self::t:persName/@key,
+            self::t:person/@xml:id)"/>
     </xsl:template>
     
     <!-- ToDo: Strukturierte Personenangaben aus listPerson -->

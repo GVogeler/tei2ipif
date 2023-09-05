@@ -1,6 +1,7 @@
 # tei2ipif
 experiments with more or less generic proposal how to convert a TEI scholarly edition into an IPIF data set that can be process by http://github.com/IPIF/ipif-hub
 
+# About
 This is the start of a generic TEI2IPIF conversion based on some regular practice in modelling personography in TEI encoded scholarly editions.
 It is based on the assumption that the edition uses the following tags to identify the occurence of a person in a text:
    `t:rs[@type="person"]`, `t:name[@type="person"]`, `t:persName`
@@ -17,3 +18,10 @@ Comments and improvements are welcome!
     
 Georg Vogeler <georg.vogeler@uni-graz.at>
 
+# ToDo
+- add listPerson/person handling
+- check handling of `@key`
+- check generalisation with other sample data
+- create minimum test set for unit-testing:
+	- sample input
+	- fitting output
